@@ -1,0 +1,137 @@
+name: ci
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: windows-2022
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache Qt
+      uses: actions/cache@v2
+      id: cache-qt-5_15_2
+      with:
+        path: ${{github.workspace}}/deps/qt
+        key: cache-qt-5_15_2
+
+    - name: Download Qt
+      if: steps.cache-qt-5_15_2.outputs.cache-hit != 'true'
+      run: |
+        curl -kLO https://cdn-fastly.obsproject.com/downloads/Qt_5.15.2.7z -f --retry 5 -z Qt_5.15.2.7z
+        7z x Qt_5.15.2.7z -o${{github.workspace}}/deps/qt
+    
+    - name: Cache OBS deps
+      uses: actions/cache@v2
+      id: cache-obs-deps-2019
+      with:
+        path: ${{github.workspace}}/deps/obs-deps
+        key: cache-obs-deps-2019
+    
+    - name: Download OBS deps
+      if: steps.cache-obs-deps-2019.outputs.cache-hit != 'true'
+      run: |
+        curl -kLO https://obsproject.com/downloads/dependencies2019.zip -f --retry 5 -z dependencies2019.zip
+        7z x dependencies2019.zip -o${{github.workspace}}/deps/obs-deps
+      
+    - name: Cache OBS
+      uses: actions/cache@v2
+      id: cache-obs-27_0_1
+      with:
+        path: ${{github.workspace}}/deps/obs/install
+        key: cache-obs-27_0_1
+    
+    - name: Build OBS
+      if: steps.cache-obs-27_0_1.outputs.cache-hit != 'true'
+      run: |
+        curl -kLO https://github.com/obsproject/obs-studio/archive/refs/tags/27.0.1.zip -f --retry 5 -z 27.0.1.zip
+        7z x 27.0.1.zip -o${{github.workspace}}/deps/obs
+        cmake -G "Visual Studio 17 2022" -A x64 -S ${{github.workspace}}/deps/obs/obs-studio-27.0.1 -B ${{github.workspace}}/deps/obs/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/deps/obs/install -DDepsPath=${{github.workspace}}/deps/obs-deps/win64 -DQTDIR=${{github.workspace}}/deps/qt/5.15.2/msvc2019_64 -DBUILD_BROWSER=OFF -DBUILD_VST=OFF
+        cmake --build ${{github.workspace}}/deps/obs/build --config ${{env.BUILD_TYPE}} --target install  --parallel
+
+    - name: Cache Poco
+      uses: actions/cache@v2
+      id: cache-poco-1_11_0
+      with:
+        path: ${{github.workspace}}/deps/poco/install
+        key: cache-poco-1_11_0
+    
+    - name: Build Poco
+      if: steps.cache-poco-1_11_0.outputs.cache-hit != 'true'
+      run: |
+        curl -kLO https://github.com/pocoproject/poco/archive/refs/tags/poco-1.11.0-release.zip -f --retry 5 -z poco-1.11.0-release.zip
+        7z x poco-1.11.0-release.zip -o${{github.workspace}}/deps/poco
+        cmake -G "Visual Studio 17 2022" -A x64 -S ${{github.workspace}}/deps/poco/poco-poco-1.11.0-release -B ${{github.workspace}}/deps/poco/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/deps/poco/install -DBUILD_SHARED_LIBS=OFF -DENABLE_NETSSL_WIN=ON
+        cmake --build ${{github.workspace}}/deps/poco/build --config ${{env.BUILD_TYPE}} --target install  --parallel
+
+    - name: Cache Inno Setup
+      uses: actions/cache@v2
+      id: cache-inno_setup-6_1_2_4
+      with:
+        path: ${{github.workspace}}/deps/inno-setup
+        key: cache-inno_setup-6_1_2_4
+    
+    - name: Download Inno Setup
+      if: steps.cache-inno_setup-6_1_2_4.outputs.cache-hit != 'true'
+      run: |
+        curl -kLO https://github.com/portapps/innosetup-portable/releases/download/6.1.2-4/innosetup-portable-win32-6.1.2-4.7z -f --retry 5 -z innosetup-portable-win32-6.1.2-4.7z
+        7z x innosetup-portable-win32-6.1.2-4.7z -o${{github.workspace}}/deps/inno-setup
+
+    - name: Configure CMake
+      run: cmake -G "Visual Studio 17 2022" -A x64 -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DLibObs_DIR=${{github.workspace}}/deps/obs/install/cmake/LibObs -DPoco_DIR=${{github.workspace}}/deps/poco/install/cmake
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target install --parallel
+    
+    - name: Create Release name
+      id: create_release_name
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.create_release_name.outputs.sha_short }}
+        release_name: Release ${{ steps.create_release_name.outputs.sha_short }}
+        body: |
+          Changes in this Release
+          - First Change
+          - Second Change
+        draft: false
+        prerelease: false
+
+    - name: Prepare Release Asset
+      run: 7z a ${{github.workspace}}/obs-league-spectator-${{ steps.create_release_name.outputs.sha_short }}.zip ${{github.workspace}}/build/install/*
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}/obs-league-spectator-${{ steps.create_release_name.outputs.sha_short }}.zip
+        asset_name: obs-league-spectator-${{ steps.create_release_name.outputs.sha_short }}.zip
+        asset_content_type: application/zip
+    
+    - name: Prepare Release Installer
+      run: ${{github.workspace}}/deps/inno-setup/app/ISCC.exe ${{github.workspace}}/installer/installer.generated.iss /O${{github.workspace}} /F"obs-league-spectator-${{ steps.create_release_name.outputs.sha_short }}-Windows-Installer"
+
+    - name: Upload Release Installer
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}/obs-league-spectator-${{ steps.create_release_name.outputs.sha_short }}-Windows-Installer.exe
+        asset_name: obs-league-spectator-${{ steps.create_release_name.outputs.sha_short }}-Windows-Installer.exe
+        asset_content_type: application/octet-stream7z
