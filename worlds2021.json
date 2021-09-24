@@ -1,111 +1,51 @@
 [
 	{
-		"summonerName" : "NanamiHakuya",
-		"proName" : "TL CoreJJ"
-	},
-	{
-		"summonerName" : "Chrollo Lücifer",
-		"proName" : "C9 Blaber"
-	},
-	{
-		"summonerName" : "UnstoppableForce",
-		"proName" : "TL Tactical"
-	},
-	{
-		"summonerName" : "Chrollo Lücilfer",
-		"proName" : "C9 Fudge"
-	},
-	{
-		"summonerName" : "OG Carlito",
-		"proName" : "TL Alphari"
-	},
-	{
 		"summonerName" : "dofaminu",
 		"proName" : "100T Tenacity"
-	},
-	{
-		"summonerName" : "euw tourist",
-		"proName" : "C9 Vulcan"
-	},
-	{
-		"summonerName" : "C9 ZVENNN",
-		"proName" : "C9 Zven"
-	},
-	{
-		"summonerName" : "agdang",
-		"proName" : "100T Abbedagge"
-	},
-	{
-		"summonerName" : "presetdocalabras",
-		"proName" : "RED Avenger"
-	},
-	{
-		"summonerName" : "Aegis fangirlQAQ",
-		"proName" : "RED JoJo"
 	},
 	{
 		"summonerName" : "NA Hopium",
 		"proName" : "100T FBI"
 	},
 	{
-		"summonerName" : "B99 PERALTHAR",
-		"proName" : "RED Grevthar"
-	},
-	{
-		"summonerName" : "Banande",
-		"proName" : "100T Huhi"
+		"summonerName" : "agdang",
+		"proName" : "100T Abbedagge"
 	},
 	{
 		"summonerName" : "nangman topsolo",
 		"proName" : "100T Ssumday"
 	},
 	{
-		"summonerName" : "Lasthitmagic",
-		"proName" : "RED TitaN"
+		"summonerName" : "Banande",
+		"proName" : "100T Huhi"
 	},
 	{
-		"summonerName" : "JetlagIsAMyth",
-		"proName" : "TL Santorin"
+		"summonerName" : "Chrollo Lücifer",
+		"proName" : "C9 Blaber"
 	},
 	{
-		"summonerName" : "2021Worlds0058",
-		"proName" : "GS Bolulu"
+		"summonerName" : "C9 ZVENNN",
+		"proName" : "C9 Zven"
 	},
 	{
-		"summonerName" : "ssibal mosquitos",
-		"proName" : "RED Guigo"
+		"summonerName" : "Chrollo Lücilfer",
+		"proName" : "C9 Fudge"
 	},
 	{
-		"summonerName" : "livelyfish5",
-		"proName" : "MAD Kaiser"
+		"summonerName" : "euw tourist",
+		"proName" : "C9 Vulcan"
 	},
 	{
 		"summonerName" : "theclutchfact0r",
 		"proName" : "C9 Perkz"
 	},
 	{
-		"summonerName" : "2021Worlds0019",
-		"proName" : "TL Jensen"
-	},
-	{
-		"summonerName" : "JoJo fangirlQAQ",
-		"proName" : "RED Aegis"
-	},
-	{
 		"summonerName" : "FNC Upset13",
 		"proName" : "FNC Upset"
 	},
 	{
-		"summonerName" : "2021Worlds0033",
-		"proName" : "MAD Armut"
-	},
-	{
 		"summonerName" : "FNC Hylissangg",
 		"proName" : "FNC Hylissang"
-	},
-	{
-		"summonerName" : "ReaI MAN",
-		"proName" : "GS Mojito"
 	},
 	{
 		"summonerName" : "Sigmα Grindset",
@@ -116,11 +56,75 @@
 		"proName" : "FNC Bwipo"
 	},
 	{
+		"summonerName" : "2021Worlds0058",
+		"proName" : "GS Bolulu"
+	},
+	{
+		"summonerName" : "ReaI MAN",
+		"proName" : "GS Mojito"
+	},
+	{
+		"summonerName" : "2021Worlds0033",
+		"proName" : "MAD Armut"
+	},
+	{
+		"summonerName" : "mommys milk yum",
+		"proName" : "MAD Carzzy"
+	},
+	{
+		"summonerName" : "livelyfish5",
+		"proName" : "MAD Kaiser"
+	},
+	{
+		"summonerName" : "presetdocalabras",
+		"proName" : "RED Avenger"
+	},
+	{
+		"summonerName" : "Aegis fangirlQAQ",
+		"proName" : "RED JoJo"
+	},
+	{
+		"summonerName" : "Lasthitmagic",
+		"proName" : "RED TitaN"
+	},
+	{
+		"summonerName" : "B99 PERALTHAR",
+		"proName" : "RED Grevthar"
+	},
+	{
+		"summonerName" : "ssibal mosquitos",
+		"proName" : "RED Guigo"
+	},
+	{
+		"summonerName" : "JoJo fangirlQAQ",
+		"proName" : "RED Aegis"
+	},
+	{
 		"summonerName" : "2021Worlds0053",
 		"proName" : "RGE Hans sama"
 	},
 	{
 		"summonerName" : "2021Worlds0055",
 		"proName" : "RGE Trymbi"
-	}
+	},
+	{
+		"summonerName" : "NanamiHakuya",
+		"proName" : "TL CoreJJ"
+	},
+	{
+		"summonerName" : "UnstoppableForce",
+		"proName" : "TL Tactical"
+	},
+	{
+		"summonerName" : "OG Carlito",
+		"proName" : "TL Alphari"
+	},
+	{
+		"summonerName" : "JetlagIsAMyth",
+		"proName" : "TL Santorin"
+	},
+	{
+		"summonerName" : "2021Worlds0019",
+		"proName" : "TL Jensen"
+	},
 ]
