@@ -76,8 +76,13 @@ std::vector<uint8_t> render_text(uint32_t width, uint32_t height, const std::wst
 			{
 				std::vector<std::wstring> lines = split_string(text, L"\n");
 
-				std::wstring leftPart = std::accumulate(lines.begin() + 1, lines.begin() + (lines.size() / 2), lines.front(), [](std::wstring s0, const std::wstring& s1) { return std::move(s0.append(L"\n").append(s1)); });
-				std::wstring rightPart = std::accumulate(lines.begin() + 1 + (lines.size() / 2), lines.end(), *(lines.begin() + (lines.size() / 2)), [](std::wstring s0, const std::wstring& s1) { return std::move(s0.append(L"\n").append(s1)); });
+				const auto concat = [](std::wstring s0, const std::wstring& s1) { return std::move(s0.append(L"\n").append(s1)); };
+				std::wstring leftPart = std::accumulate(lines.begin() + 1, lines.begin() + (lines.size() / 2), lines.front(), concat);
+				std::wstring rightPart = std::accumulate(lines.begin() + 1 + (lines.size() / 2), lines.end(), *(lines.begin() + (lines.size() / 2)), concat);
+				if (lines.size() % 2 == 0)
+				{
+					rightPart.append(L"\u00A0");
+				}
 
 				Gdiplus::RectF beforeLeft;
 				if (Gdiplus::Status st = gr.MeasureString(leftPart.c_str(), static_cast<int>(leftPart.size()), &font, Gdiplus::PointF(0, 0), &format, &beforeLeft); st == Gdiplus::Status::Ok && beforeLeft.Width != 0 && beforeLeft.Height != 0)

@@ -160,13 +160,13 @@ void asd(foo* data)
 	if (textLeft != data->lastTextLeft)
 	{
 		data->lastTextLeft = textLeft;
-		data->texLeft = make_tex(data->texLeft, width, data->ud.h, textLeft, data->ud.colorLeft, 0);
+		data->texLeft = make_tex(data->texLeft, width, data->ud.h, textLeft, data->ud.colorLeft, 1);
 	}
 
 	if (textRight != data->lastTextRight)
 	{
 		data->lastTextRight = textRight;
-		data->texRight = make_tex(data->texRight, width, data->ud.h, textRight, data->ud.colorRight, 1);
+		data->texRight = make_tex(data->texRight, width, data->ud.h, textRight, data->ud.colorRight, 0);
 	}
 }
 
