@@ -60,7 +60,9 @@ static inline std::wstring to_wide(const std::string& utf8)
 	size_t len = os_utf8_to_wcs(utf8.c_str(), 0, nullptr, 0);
 	text.resize(len);
 	if (len)
+	{
 		os_utf8_to_wcs(utf8.c_str(), 0, &text[0], len + 1);
+	}
 
 	return text;
 }
@@ -100,6 +102,9 @@ void update(userdata& data)
 
 struct foo
 {
+	std::wstring lastTextLeft = L"";
+	std::wstring lastTextRight = L"";
+
 	gs_texture_t* texLeft = nullptr;
 	gs_texture_t* texRight = nullptr;
 	obs_source_t* source = nullptr;
@@ -132,7 +137,9 @@ gs_texture_t* make_tex(gs_texture_t* tex, uint32_t width, uint32_t height, const
 
 	obs_enter_graphics();
 	if (tex)
+	{
 		gs_texture_destroy(tex);
+	}
 	auto* result_tex = gs_texture_create(width, height, GS_BGRA, 1, &ep, GS_DYNAMIC);
 	obs_leave_graphics();
 	return result_tex;
@@ -150,8 +157,17 @@ void asd(foo* data)
 		textRight = data->ud.textRight;
 	}
 
-	data->texLeft = make_tex(data->texLeft, width, data->ud.h, textLeft, data->ud.colorLeft, 0);
-	data->texRight = make_tex(data->texRight, width, data->ud.h, textRight, data->ud.colorRight, 1);
+	if (textLeft != data->lastTextLeft)
+	{
+		data->lastTextLeft = textLeft;
+		data->texLeft = make_tex(data->texLeft, width, data->ud.h, textLeft, data->ud.colorLeft, 0);
+	}
+
+	if (textRight != data->lastTextRight)
+	{
+		data->lastTextRight = textRight;
+		data->texRight = make_tex(data->texRight, width, data->ud.h, textRight, data->ud.colorRight, 1);
+	}
 }
 
 obs_source_info make_source()
@@ -193,10 +209,10 @@ obs_source_info make_source()
 		uint32_t colorRight = (uint32_t)obs_data_get_int(settings, "colorRight");
 
 		auto f = new foo();
+		f->source = source;
 		f->ud.w = width;
 		f->ud.h = height;
 		f->ud.gap = gap;
-		f->source = source;
 		f->ud.path = path;
 		f->ud.colorLeft = colorLeft;
 		f->ud.colorRight = colorRight;
@@ -273,11 +289,17 @@ obs_source_info make_source()
 
 		auto width = (foo_data->ud.w - foo_data->ud.gap) / 2;
 
-		gs_effect_set_texture_srgb(gs_effect_get_param_by_name(effect, "image"), foo_data->texLeft);
-		obs_source_draw(foo_data->texLeft, 0, 0, width, foo_data->ud.h, false);
+		if (foo_data->texLeft != nullptr)
+		{
+			gs_effect_set_texture_srgb(gs_effect_get_param_by_name(effect, "image"), foo_data->texLeft);
+			obs_source_draw(foo_data->texLeft, 0, 0, width, foo_data->ud.h, false);
+		}
 
-		gs_effect_set_texture_srgb(gs_effect_get_param_by_name(effect, "image"), foo_data->texRight);
-		obs_source_draw(foo_data->texRight, width + foo_data->ud.gap, 0, width, foo_data->ud.h, false);
+		if (foo_data->texRight != nullptr)
+		{
+			gs_effect_set_texture_srgb(gs_effect_get_param_by_name(effect, "image"), foo_data->texRight);
+			obs_source_draw(foo_data->texRight, width + foo_data->ud.gap, 0, width, foo_data->ud.h, false);
+		}
 
 		gs_technique_end_pass(tech);
 		gs_technique_end(tech);

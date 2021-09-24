@@ -1,5 +1,7 @@
 #include "lcu.h"
 
+#include "plugin-macros.generated.h"
+
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
@@ -49,15 +51,30 @@ std::array<player, 10> get_players()
                 {
                     Poco::JSON::Object::Ptr player = allPlayers->getObject(i);
 
-                    result[i].name = player->getValue<std::string>("summonerName");
-                    result[i].champion = player->getValue<std::string>("championName");
-                    result[i].team = player->getValue<std::string>("team");
+                    if (player != nullptr)
+                    {
+                        if (player->has("summonerName") && player->has("championName") && player->has("team"))
+                        {
+                            result[i].name = player->getValue<std::string>("summonerName");
+                            result[i].champion = player->getValue<std::string>("championName");
+                            result[i].team = player->getValue<std::string>("team");
+                        }
+                        else
+                        {
+                            blog(LOG_WARNING, "json is missing fields summonerName(%d), championName(%d), team(%d)!", player->has("summonerName"), player->has("championName"), player->has("team"));
+                        }
+                    }
                 }
             }
         }
     }
-    catch(const Poco::Net::NetException&)
+    catch(const Poco::Net::NetException& ex)
     {
+        blog(LOG_INFO, "Net exception occured (%s)!", ex.what());
+    }
+    catch(const Poco::JSON::JSONException& ex)
+    {
+        blog(LOG_WARNING, "JSON exception occured (%s)!", ex.what());
     }
     
     return result;
@@ -75,19 +92,32 @@ std::map<std::string, std::string> get_pros(const std::string& path)
         Poco::Dynamic::Var content = parser.parse(f);
         Poco::JSON::Array::Ptr allPros = content.extract<Poco::JSON::Array::Ptr>();
 
-        for(auto i = 0u; i < allPros->size(); ++i)
+        if (allPros != nullptr)
         {
-            Poco::JSON::Object::Ptr player = allPros->getObject(i);
+            for(auto i = 0u; i < allPros->size(); ++i)
+            {
+                Poco::JSON::Object::Ptr player = allPros->getObject(i);
 
-            auto summonerName = player->getValue<std::string>("summonerName");
-            auto proName = player->getValue<std::string>("proName");
+                if (player != nullptr)
+                {
+                    if (player->has("summonerName") && player->has("proName"))
+                    {
+                        auto summonerName = player->getValue<std::string>("summonerName");
+                        auto proName = player->getValue<std::string>("proName");
 
-            result.emplace(summonerName, proName);
+                        result.emplace(summonerName, proName);
+                    }
+                    else
+                    {
+                        blog(LOG_WARNING, "json is missing fields summonerName(%d), proName(%d)!", player->has("summonerName"), player->has("proName"));
+                    }
+                }
+            }
         }
     }
-    catch(const Poco::JSON::JSONException&)
+    catch(const Poco::JSON::JSONException& ex)
     {
-
+        blog(LOG_WARNING, "JSON exception occured (%s)!", ex.what());
     }
 
     return result;

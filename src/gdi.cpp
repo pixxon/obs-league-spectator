@@ -1,5 +1,7 @@
 #include "gdi.h"
 
+#include "plugin-macros.generated.h"
+
 #include <windows.h>
 #include <gdiplus.h>
 
@@ -40,18 +42,42 @@ std::vector<uint8_t> render_text(uint32_t width, uint32_t height, const std::wst
 	Gdiplus::FontFamily x(L"Arial");
 	Gdiplus::Font font(&x, 72);
 	Gdiplus::SolidBrush brush = Gdiplus::Color(calc_color(rgb_to_bgr(color), 100));
-	gr.Clear(Gdiplus::Color(0));
-	
-	Gdiplus::StringFormat format(Gdiplus::StringFormat::GenericTypographic());
-	format.SetAlignment((i == 0 ? Gdiplus::StringAlignment::StringAlignmentNear : Gdiplus::StringAlignment::StringAlignmentFar));
-	format.SetLineAlignment(Gdiplus::StringAlignment::StringAlignmentCenter);
+	if (Gdiplus::Status st = gr.Clear(Gdiplus::Color(0)); st == Gdiplus::Status::Ok)
+	{
+		Gdiplus::StringFormat format(Gdiplus::StringFormat::GenericTypographic());
+		format.SetAlignment((i == 0 ? Gdiplus::StringAlignment::StringAlignmentNear : Gdiplus::StringAlignment::StringAlignmentFar));
+		format.SetLineAlignment(Gdiplus::StringAlignment::StringAlignmentCenter);
 
-	Gdiplus::RectF before;
-	gr.MeasureString(text.c_str(), -1, &font, Gdiplus::PointF(0, 0), &format, &before);
-	float scale = min(float(width) / before.Width, float(height) / before.Height);
+		Gdiplus::RectF before;
+		if (Gdiplus::Status st = gr.MeasureString(text.c_str(), -1, &font, Gdiplus::PointF(0, 0), &format, &before); st == Gdiplus::Status::Ok && before.Width != 0 && before.Height != 0)
+		{
+			float scale = min(float(width) / before.Width, float(height) / before.Height);
 
-	gr.ScaleTransform(scale, scale);
-	gr.DrawString(text.c_str(), -1, &font, Gdiplus::PointF((i == 0 ? 0 : width) / scale, (height / 2) / scale), &format, &brush);
+			if (Gdiplus::Status st = gr.ScaleTransform(scale, scale); st == Gdiplus::Status::Ok)
+			{
+				if (Gdiplus::Status st = gr.DrawString(text.c_str(), -1, &font, Gdiplus::PointF((i == 0 ? 0 : width) / scale, (height / 2) / scale), &format, &brush); st == Gdiplus::Status::Ok)
+				{
+					return bits;
+				}
+				else
+				{
+					blog(LOG_WARNING, "DrawString failed, with text: %s", text.c_str());
+				}
+			}
+			else
+			{
+				blog(LOG_WARNING, "ScaleTransform failed, with scale: %f", scale);
+			}
+		}
+		else
+		{
+			blog(LOG_WARNING, "MeasureString failed, with text: %s", text.c_str());
+		}
+	}
+	else
+	{
+		blog(LOG_WARNING, "Clear failed");
+	}
 
-	return bits;
+	return {};
 }
